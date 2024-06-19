@@ -3,6 +3,8 @@ const userTable = require("../Models/Users");
 const appointmentTable = require("../Models/Appointments")
 const testTable = require("../Models/Tests")
 const testBookingTable = require("../Models/TestBooking")
+const medicineTable = require("../Models/Medicines")
+const orderTable = require("../Models/Orders")
 const stripe = require('stripe')('sk_test_51NxBhTEWwd2L3hVcqKggRsddgVdE7Q2gO7tkapbEzMRINxkLf9twyWTIbMv0K9cpkieEAfGXRHTsoyClzt7yhQwX007TC5uy2q');
 
 exports.addDoc = async (req, res) => {
@@ -218,6 +220,80 @@ exports.filterMedicalTests = async (req, res) => {
         }
         else {
             res.status(400).json({ success: false, message: "invalid test category" })
+        }
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server error", error: error.message });
+    }
+}
+
+exports.addMedicine = async (req, res) => {
+    try {
+        const data = req.body
+        const medicine = await medicineTable.create(data)
+        if (medicine) {
+            res.status(200).json({ success: true, message: "medicine added" })
+        } else {
+            res.status(400).json({ success: false, message: "medicine not added" })
+        }
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server error", error: error.message });
+    }
+}
+
+exports.getMedicines = async (req, res) => {
+    try {
+        const data = await medicineTable.find();
+
+        if (data) {
+            res.status(200).json({ success: true, message: "Data fetched", data });
+        } else {
+            res.status(404).json({ success: false, message: "No data found" });
+        }
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server error", error: error.message });
+    }
+}
+
+exports.searchMedicines = async (req, res) => {
+    try {
+        const { medName } = req.params
+        console.log(medName);
+        const medicine = await medicineTable.find({ medName: { $regex: medName } });
+        if (medicine) {
+            res.status(200).json({ success: true, message: "Data fetched", medicine: medicine });
+        } else {
+            res.status(404).json({ success: false, message: "No data found" });
+        }
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server error", error: error.message });
+    }
+}
+
+exports.loggedUser = async (req, res) => {
+    try {
+        const { id } = req.user
+        const user = await userTable.findById({ _id: id })
+        if (user) {
+            res.status(200).json({ success: true, message: "Data fetched", user: user });
+        } else {
+            res.status(400).json({ success: false, message: "No data found" });
+        }
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server error", error: error.message });
+    }
+}
+
+exports.placeOrder = async (req, res) => {
+    try {
+        const data = req.body
+        const { id } = req.user
+        const orderData = { ...data, user: id }
+
+        const order = await orderTable.create(orderData)
+        if (order) {
+            res.status(200).json({ success: true, message: "Order placed" });
+        } else {
+            res.status(400).json({ success: false, message: "Order not placed" });
         }
     } catch (error) {
         res.status(500).json({ success: false, message: "Server error", error: error.message });
