@@ -11,6 +11,10 @@ const orderSchema = new mongoose.Schema({
             medPrice: {
                 type: Number,
                 required: [true, 'Please enter the product price']
+            },
+            medQuantity: {
+                type: Number,
+                required: [true, 'Please enter the product quantity']
             }
         }
     ],

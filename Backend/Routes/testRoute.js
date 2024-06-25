@@ -1,6 +1,6 @@
 const express = require("express")
 const auth = require("../Middleware/auth")
-const { addDoc, getDoctor, registerUser, loginUser, bookAppointment, stripeGateway, viewAppointments, cancelAppointment, addTest, getTests, bookLabTest, filterMedicalTests, addMedicine, getMedicines, searchMedicines, loggedUser, placeOrder } = require("../Controller/testController")
+const { addDoc, getDoctor, registerUser, loginUser, bookAppointment, stripeGateway, viewAppointments, cancelAppointment, addTest, getTests, bookLabTest, filterMedicalTests, addMedicine, getMedicines, searchMedicines, loggedUser, placeOrder, updateProfile, fetchOrders, cancelOrder, ambulanceBooking, updateInventory } = require("../Controller/testController")
 const router = express.Router()
 
 router.route("/addDoctor").post(addDoc)
@@ -20,6 +20,11 @@ router.route("/getMedicines").get(getMedicines)
 router.route("/searchMedicines/:medName").post(searchMedicines)
 router.route("/loggedUser").get(auth, loggedUser)
 router.route("/placeOrder").post(auth, placeOrder)
+router.route("/updateProfile").post(auth, updateProfile)
+router.route("/fetchOrders").get(auth, fetchOrders)
+router.route("/cancelOrder/:id").delete(auth, cancelOrder)
+router.route("/ambulanceBooking").post(ambulanceBooking)
+router.route("/updateInventory").put(auth, updateInventory)
 
 module.exports = router;
 

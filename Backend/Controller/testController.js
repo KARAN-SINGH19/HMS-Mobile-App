@@ -5,6 +5,7 @@ const testTable = require("../Models/Tests")
 const testBookingTable = require("../Models/TestBooking")
 const medicineTable = require("../Models/Medicines")
 const orderTable = require("../Models/Orders")
+const ambulanceBookingTable = require("../Models/AmbulanceBookings")
 const stripe = require('stripe')('sk_test_51NxBhTEWwd2L3hVcqKggRsddgVdE7Q2gO7tkapbEzMRINxkLf9twyWTIbMv0K9cpkieEAfGXRHTsoyClzt7yhQwX007TC5uy2q');
 
 exports.addDoc = async (req, res) => {
@@ -294,6 +295,74 @@ exports.placeOrder = async (req, res) => {
             res.status(200).json({ success: true, message: "Order placed" });
         } else {
             res.status(400).json({ success: false, message: "Order not placed" });
+        }
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server error", error: error.message });
+    }
+}
+
+exports.updateInventory = async (req, res) => {
+    try {
+        const medDetails = req.body
+        for (let index = 0; index < medDetails.length; index++) {
+            const updateStock = await medicineTable.updateMany({ medName: { $in: [medDetails[index].medNames] } }, { $set: { stock: medDetails[index].newQty } })
+        }
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server error", error: error.message });
+    }
+}
+
+exports.updateProfile = async (req, res) => {
+    try {
+        const data = req.body
+        const { id } = req.user
+        const user = await userTable.findByIdAndUpdate({ _id: id }, data)
+        if (user) {
+            res.status(200).json({ success: true, message: "User updated" });
+        } else {
+            res.status(400).json({ success: false, message: "User not updated" });
+        }
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server error", error: error.message });
+    }
+}
+
+exports.fetchOrders = async (req, res) => {
+    try {
+        const data = await orderTable.find()
+        if (data) {
+            res.status(200).json({ success: true, message: "Orders fetched", data: data });
+        } else {
+            res.status(400).json({ success: false, message: "Orders not fetched" });
+        }
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server error", error: error.message });
+    }
+}
+
+exports.cancelOrder = async (req, res) => {
+    try {
+        const { id } = req.params
+        console.log(id);
+        const order = await orderTable.findByIdAndDelete(id)
+        if (order) {
+            res.status(200).json({ success: true, message: "Order deleted" });
+        } else {
+            res.status(400).json({ success: false, message: "Order not deleted" });
+        }
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Server error", error: error.message });
+    }
+}
+
+exports.ambulanceBooking = async (req, res) => {
+    try {
+        const data = req.body
+        const booking = await ambulanceBookingTable.create(data)
+        if (booking) {
+            res.status(200).json({ success: true, message: "Ambulance booked" });
+        } else {
+            res.status(400).json({ success: false, message: "Ambulance not booked" });
         }
     } catch (error) {
         res.status(500).json({ success: false, message: "Server error", error: error.message });
